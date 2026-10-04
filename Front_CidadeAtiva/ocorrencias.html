@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocorrências - Cidade Ativa</title>
+    <!-- Abra com Live Server (ou outro http://) para a lista carregar; file:// costuma bloquear chamadas à API. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="css/ocorrencias.css" rel="stylesheet">
+    <link href="css/modal.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="bg-overlay"></div>
+
+    <nav>
+        <a href="index.html">Voltar</a>
+        <img src="images/Logo.png" class="Logo" alt="Logo">
+    </nav>
+
+    <main class="container">
+        <section class="content">
+            <div class="search-panel">
+                <label class="search-label" for="buscarOcorrencias">Buscar ocorrências</label>
+                <div class="search-bar">
+                    <input id="buscarOcorrencias" type="text" placeholder="Ex.: luz apagada, buraco, vazamento..." />
+                    <button id="botaoBuscar" type="button" class="btn-search">Buscar</button>
+                    <button id="botaoVoz" type="button" class="btn-voice" title="Buscar por voz" aria-label="Buscar por voz">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <p id="resultadoBusca" class="search-status">Exibindo todas as ocorrências.</p>
+            </div>
+
+            <div class="occurrences-list" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <div id="viewModal" class="modal">
+        <div class="modal-content modal-content--wide">
+            <span class="close close-view" title="Fechar">&times;</span>
+            <h2>Visualizar ocorrência</h2>
+            <div class="view-body">
+                <p class="card-label">Título</p>
+                <p id="viewTitulo" class="view-text"></p>
+                <p class="card-label">Localização</p>
+                <p id="viewLocalizacao" class="view-text"></p>
+                <p class="card-label">Descrição</p>
+                <p id="viewDescricao" class="view-text view-text--desc"></p>
+                <div id="viewImagemWrap" class="view-imagem-wrap" hidden>
+                    <p class="card-label">Foto</p>
+                    <img id="viewImagem" class="view-imagem" src="" alt="Foto da ocorrência">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content modal-content--wide">
+            <span class="close close-edit" title="Fechar">&times;</span>
+            <h2>Editar Ocorrência</h2>
+            <form id="editForm">
+                <label for="editTitle">Título</label>
+                <input type="text" id="editTitle" placeholder="Título">
+                <label for="editLocation">Localização</label>
+                <input type="text" id="editLocation" placeholder="Localização">
+                <label for="editDescription">Descrição</label>
+                <textarea id="editDescription" placeholder="Descrição"></textarea>
+
+                <label>Foto da ocorrência</label>
+                <div class="edit-foto-row">
+                    <div id="editImagemPreviewWrap" class="edit-imagem-preview-wrap" hidden>
+                        <img id="editImagemPreview" src="" alt="Pré-visualização">
+                    </div>
+                    <div class="edit-foto-actions">
+                        <input type="file" id="editFoto" accept="image/*,.webp,image/webp">
+                        <button type="button" id="editRemoverFoto" class="btn-modal-secondary">Remover foto atual</button>
+                    </div>
+                </div>
+
+                <button type="submit">Salvar</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/config.js"></script>
+    <script src="js/ocorrencias.js"></script>
+</body>
+
+</html>
