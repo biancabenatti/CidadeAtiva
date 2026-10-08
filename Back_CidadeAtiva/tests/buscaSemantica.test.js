@@ -1,37 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-
-function normalizarTexto(texto) {
-  return String(texto || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function calcularRelevancia(consulta, ocorrencia) {
-  const termoConsulta = normalizarTexto(consulta);
-  const textoOcorrencia = normalizarTexto(
-    `${ocorrencia.titulo} ${ocorrencia.localizacao} ${ocorrencia.descricao}`
-  );
-
-  const termos = termoConsulta.split(' ').filter(Boolean);
-  let score = 0;
-
-  for (const termo of termos) {
-    if (!termo) continue;
-    if (textoOcorrencia.includes(termo)) score += 3;
-    if (textoOcorrencia.includes(termo + 's') || textoOcorrencia.includes(termo.substring(0, termo.length - 1))) score += 1;
-    if (termo === 'luz' && textoOcorrencia.includes('iluminacao')) score += 3;
-    if (termo === 'buraco' && textoOcorrencia.includes('furo')) score += 3;
-    if (termo === 'falta' && textoOcorrencia.includes('ausencia')) score += 3;
-    if (termo === 'limpeza' && textoOcorrencia.includes('sujeira')) score += 3;
-  }
-
-  return score;
-}
+const { calcularRelevancia } = require('../services/buscaSemantica');
 
 function buscarSemantica(consulta, ocorrencias) {
   return ocorrencias
@@ -65,16 +34,16 @@ test('deve encontrar ocorrências pela busca semântica em “luz apagada”', (
   assert.ok(resultado[0].score > 0);
 });
 
-test('deve considerar termos semânticos equivalentes como “furo” e “buraco”', () => {
+test('deve considerar “buraco” e “afundamento” como termos equivalentes', () => {
   const ocorrencias = [
     {
       titulo: 'Vazamento de água',
       localizacao: 'Praça da Matriz',
-      descricao: 'Há um buraco na rua causando risco de acidente.',
+      descricao: 'Afundamento na rua causando risco de acidente.',
     },
   ];
 
-  const resultado = buscarSemantica('furo na rua', ocorrencias);
+  const resultado = buscarSemantica('buraco', ocorrencias);
 
   assert.equal(resultado.length, 1);
   assert.ok(resultado[0].score > 0);
