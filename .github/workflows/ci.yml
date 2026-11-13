@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependecy-path: ./Back_CidadeAtiva/package-lock.json
+          cache-dependency-path: ./Back_CidadeAtiva/package-lock.json
 
       #Instala as dependências do projeto
       - name: Install dependencies
