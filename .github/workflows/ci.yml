@@ -1,4 +1,4 @@
-name: CI - Continuous Integration
+name: CI - Back_CidadeAtiva
 
 on:
   push:
@@ -9,6 +9,11 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest 
+
+    defaults:
+      run:
+        working-directory: ./Back_CidadeAtiva
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,6 +24,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependecy-path: ./Back_CidadeAtiva/package-lock.json
 
       #Instala as dependências do projeto
       - name: Install dependencies
