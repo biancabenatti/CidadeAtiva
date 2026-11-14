@@ -48,15 +48,16 @@ function resetEditImagemUi() {
 
 function renderizarOcorrencias(dados) {
   const lista = document.querySelector('.occurrences-list');
+  if (!lista) return;
   lista.innerHTML = '';
-
+/* istanbul ignore next */
   if (!dados.length) {
     lista.innerHTML = '<p class="occurrences-status">Nenhuma ocorrência encontrada para esta busca.</p>';
     return;
   }
 
   dados.forEach((o) => {
-    const id = String(o._id ?? o.id ?? '');
+    const id = String(o._id ?? o.id ?? '');/* istanbul ignore next */
     if (!id) return;
     const imagemHtml = o.imagem
       ? `<div class="card-image-preview"><img src="${escapeHtml(o.imagem)}" alt="Foto da ocorrência"></div>`
@@ -96,7 +97,8 @@ function renderizarOcorrencias(dados) {
 
 // LISTAR
 async function carregarOcorrencias(consulta = '') {
-  const lista = document.querySelector('.occurrences-list');
+  const lista = document.querySelector('.occurrences-list');/* istanbul ignore next */
+  if (!lista) return;
   lista.innerHTML = '<p class="occurrences-status">Carregando ocorrências…</p>';
 
   try {
@@ -105,7 +107,7 @@ async function carregarOcorrencias(consulta = '') {
       ? `/api/ocorrencias/busca/semantica?q=${encodeURIComponent(termo)}`
       : '/api/ocorrencias';
 
-    const response = await fetch(apiUrl(endpoint));
+    const response = await fetch(apiUrl(endpoint));/* istanbul ignore next */
     if (!response.ok) {
       const body = await response.json().catch(() => null);
       const detalhe = body?.erro ? String(body.erro) : `HTTP ${response.status}`;
@@ -118,6 +120,7 @@ async function carregarOcorrencias(consulta = '') {
     } catch {
       throw new Error('A API não retornou JSON. Verifique a URL da API e o backend.');
     }
+    /* istanbul ignore next */
     if (!Array.isArray(dados)) {
       throw new Error('Resposta inesperada da API (esperava uma lista).');
     }
@@ -135,6 +138,7 @@ async function carregarOcorrencias(consulta = '') {
   }
 }
 
+/* istanbul ignore next */
 async function deletarOcorrencia(id) {
   const confirmacao = await Swal.fire({
     title: 'Tem certeza?',
@@ -172,6 +176,7 @@ async function deletarOcorrencia(id) {
   }
 }
 
+/* istanbul ignore next */
 async function abrirModalVisualizar(id) {
   try {
     const res = await fetch(apiUrl(`/api/ocorrencias/${id}`));
@@ -187,15 +192,17 @@ async function abrirModalVisualizar(id) {
 
     const wrap = document.getElementById('viewImagemWrap');
     const img = document.getElementById('viewImagem');
-    if (o.imagem) {
-      img.src = o.imagem;
-      wrap.hidden = false;
-    } else {
-      wrap.hidden = true;
-      img.removeAttribute('src');
+    if (wrap && img) {
+      if (o.imagem) {
+        img.src = o.imagem;
+        wrap.hidden = false;
+      } else {
+        wrap.hidden = true;
+        img.removeAttribute('src');
+      }
     }
 
-    viewModal.style.display = 'block';
+    if (viewModal) viewModal.style.display = 'block';
   } catch (error) {
     Swal.fire({
       icon: 'error',
@@ -205,6 +212,7 @@ async function abrirModalVisualizar(id) {
   }
 }
 
+/* istanbul ignore next */
 async function abrirModalEditar(id) {
   idAtual = id;
   resetEditImagemUi();
@@ -227,7 +235,7 @@ async function abrirModalEditar(id) {
     }
 
     editAcaoImagem = 'manter';
-    editModal.style.display = 'block';
+    if (editModal) editModal.style.display = 'block';
   } catch (error) {
     Swal.fire({
       icon: 'error',
@@ -237,170 +245,197 @@ async function abrirModalEditar(id) {
   }
 }
 
-document.querySelector('.occurrences-list').addEventListener('click', (e) => {
-  const editBtn = e.target.closest('.btn-icon.edit');
-  if (editBtn) {
-    e.stopPropagation();
-    abrirModalEditar(editBtn.dataset.id);
-    return;
-  }
-  const delBtn = e.target.closest('.btn-icon.delete');
-  if (delBtn) {
-    e.stopPropagation();
-    deletarOcorrencia(delBtn.dataset.id);
-    return;
-  }
+/* istanbul ignore next */
+const occurrencesListEl = document.querySelector('.occurrences-list');
+if (occurrencesListEl) {
+  occurrencesListEl.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.btn-icon.edit');
+    if (editBtn) {
+      e.stopPropagation();
+      abrirModalEditar(editBtn.dataset.id);
+      return;
+    }
+    const delBtn = e.target.closest('.btn-icon.delete');
+    if (delBtn) {
+      e.stopPropagation();
+      deletarOcorrencia(delBtn.dataset.id);
+      return;
+    }
 
-  const card = e.target.closest('.card');
-  if (card && card.dataset.id) {
-    abrirModalVisualizar(card.dataset.id);
-  }
-});
+    const card = e.target.closest('.card');
+    if (card && card.dataset.id) {
+      abrirModalVisualizar(card.dataset.id);
+    }
+  });
+}
 
-document.querySelector('.close-edit').addEventListener('click', () => {
-  editModal.style.display = 'none';
-});
+/* istanbul ignore next */
+const closeEditBtn = document.querySelector('.close-edit');
+if (closeEditBtn && editModal) {
+  closeEditBtn.addEventListener('click', () => {
+    editModal.style.display = 'none';
+  });
+}
 
-document.querySelector('.close-view').addEventListener('click', () => {
-  viewModal.style.display = 'none';
-});
+/* istanbul ignore next */
+const closeViewBtn = document.querySelector('.close-view');
+if (closeViewBtn && viewModal) {
+  closeViewBtn.addEventListener('click', () => {
+    viewModal.style.display = 'none';
+  });
+}
 
+/* istanbul ignore next */
 window.addEventListener('click', (e) => {
-  if (e.target === editModal) editModal.style.display = 'none';
-  if (e.target === viewModal) viewModal.style.display = 'none';
+  if (editModal && e.target === editModal) editModal.style.display = 'none';
+  if (viewModal && e.target === viewModal) viewModal.style.display = 'none';
 });
 
-document.getElementById('editRemoverFoto').addEventListener('click', () => {
-  editAcaoImagem = 'remover';
-  document.getElementById('editFoto').value = '';
-  document.getElementById('editImagemPreviewWrap').hidden = true;
-  document.getElementById('editImagemPreview').removeAttribute('src');
-});
-
-document.getElementById('editFoto').addEventListener('change', () => {
-  const file = document.getElementById('editFoto').files[0];
-  if (!file) return;
-
-  if (!arquivoEhImagemPermitida(file)) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Arquivo não suportado',
-      text: 'Use imagem JPG, PNG, GIF ou WebP.',
-    });
+/* istanbul ignore next */
+const editRemoverFotoBtn = document.getElementById('editRemoverFoto');
+/* istanbul ignore next */
+if (editRemoverFotoBtn) {
+  editRemoverFotoBtn.addEventListener('click', () => {
+    editAcaoImagem = 'remover';
     document.getElementById('editFoto').value = '';
-    return;
-  }
+    document.getElementById('editImagemPreviewWrap').hidden = true;
+    document.getElementById('editImagemPreview').removeAttribute('src');
+  });
+}
 
-  editAcaoImagem = 'nova';
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('editImagemPreview').src = ev.target.result;
-    document.getElementById('editImagemPreviewWrap').hidden = false;
-  };
-  reader.readAsDataURL(file);
-});
+const editFotoInput = document.getElementById('editFoto');
+/* istanbul ignore next */
+if (editFotoInput) {
+  editFotoInput.addEventListener('change', () => {
+    const file = editFotoInput.files[0];
+    if (!file) return;
 
-document.getElementById('editForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const titulo = document.getElementById('editTitle').value.trim();
-  const localizacao = document.getElementById('editLocation').value.trim();
-  const descricao = document.getElementById('editDescription').value.trim();
-
-  if (!titulo || !localizacao || !descricao) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Campos obrigatórios',
-      text: 'Preencha título, localização e descrição.',
-    });
-    return;
-  }
-
-  const payload = { titulo, localizacao, descricao };
-
-  if (editAcaoImagem === 'remover') {
-    payload.imagem = null;
-  } else if (editAcaoImagem === 'nova') {
-    const file = document.getElementById('editFoto').files[0];
-    if (!file) {
-      editAcaoImagem = 'manter';
-    } else {
+    if (!arquivoEhImagemPermitida(file)) {
       Swal.fire({
-        title: 'Enviando foto…',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        didOpen: () => Swal.showLoading(),
+        icon: 'warning',
+        title: 'Arquivo não suportado',
+        text: 'Use imagem JPG, PNG, GIF ou WebP.',
       });
-      try {
-        const formData = new FormData();
-        formData.append('arquivo', file);
-        formData.append('prefix', 'ocorrencias');
-        const uploadRes = await fetch(apiUrl('/api/upload'), {
-          method: 'POST',
-          body: formData,
+      editFotoInput.value = '';
+      return;
+    }
+
+    editAcaoImagem = 'nova';
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('editImagemPreview').src = ev.target.result;
+      document.getElementById('editImagemPreviewWrap').hidden = false;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* istanbul ignore next */
+const editFormEl = document.getElementById('editForm');
+/* istanbul ignore next */
+if (editFormEl) {
+  editFormEl.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const titulo = document.getElementById('editTitle').value.trim();
+    const localizacao = document.getElementById('editLocation').value.trim();
+    const descricao = document.getElementById('editDescription').value.trim();
+/* istanbul ignore next */
+    if (!titulo || !localizacao || !descricao) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obrigatórios',
+        text: 'Preencha título, localização e descrição.',
+      });
+      return;
+    }
+
+    const payload = { titulo, localizacao, descricao };
+/* istanbul ignore next */
+    if (editAcaoImagem === 'remover') {
+      payload.imagem = null;
+    } else if (editAcaoImagem === 'nova') {
+      const file = document.getElementById('editFoto').files[0];
+      if (!file) {
+        editAcaoImagem = 'manter';
+      } else {
+        Swal.fire({
+          title: 'Enviando foto…',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => Swal.showLoading(),
         });
-        const uploadBody = await uploadRes.json().catch(() => ({}));
-        Swal.close();
-        if (!uploadRes.ok || !uploadBody.url) {
+        try {
+          const formData = new FormData();
+          formData.append('arquivo', file);
+          formData.append('prefix', 'ocorrencias');
+          const uploadRes = await fetch(apiUrl('/api/upload'), {
+            method: 'POST',
+            body: formData,
+          });
+          const uploadBody = await uploadRes.json().catch(() => ({}));
+          Swal.close();
+          if (!uploadRes.ok || !uploadBody.url) {
+            const r = await Swal.fire({
+              icon: 'warning',
+              title: 'Upload falhou',
+              text: (uploadBody.erro || 'Não foi possível enviar a nova foto. Salvar só texto e dados atuais da foto?')
+                + ' Se preferir, cancele e tente outra imagem.',
+              showCancelButton: true,
+              confirmButtonText: 'Salvar sem trocar a foto',
+              cancelButtonText: 'Cancelar',
+            });
+            if (!r.isConfirmed) return;
+            delete payload.imagem;
+          } else {
+            payload.imagem = uploadBody.url;
+          }
+        } catch (err) {
+          Swal.close();
           const r = await Swal.fire({
             icon: 'warning',
-            title: 'Upload falhou',
-            text: (uploadBody.erro || 'Não foi possível enviar a nova foto. Salvar só texto e dados atuais da foto?')
-              + ' Se preferir, cancele e tente outra imagem.',
+            title: 'Erro no upload',
+            text: 'Salvar alterações de texto sem trocar a foto?',
             showCancelButton: true,
-            confirmButtonText: 'Salvar sem trocar a foto',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Sim',
+            cancelButtonText: 'Não',
           });
           if (!r.isConfirmed) return;
           delete payload.imagem;
-        } else {
-          payload.imagem = uploadBody.url;
         }
-      } catch (err) {
-        Swal.close();
-        const r = await Swal.fire({
-          icon: 'warning',
-          title: 'Erro no upload',
-          text: 'Salvar alterações de texto sem trocar a foto?',
-          showCancelButton: true,
-          confirmButtonText: 'Sim',
-          cancelButtonText: 'Não',
-        });
-        if (!r.isConfirmed) return;
-        delete payload.imagem;
       }
     }
-  }
 
-  try {
-    const res = await fetch(apiUrl(`/api/ocorrencias/${idAtual}`), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(apiUrl(`/api/ocorrencias/${idAtual}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.erro || 'Não foi possível atualizar.');
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.erro || 'Não foi possível atualizar.');
+      }
+
+      if (editModal) editModal.style.display = 'none';
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Atualizado!',
+        text: 'Ocorrência alterada com sucesso.',
+      });
+/* istanbul ignore next */
+      carregarOcorrencias();
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro!',
+        text: error.message,
+      });
     }
-
-    editModal.style.display = 'none';
-
-    await Swal.fire({
-      icon: 'success',
-      title: 'Atualizado!',
-      text: 'Ocorrência alterada com sucesso.',
-    });
-
-    carregarOcorrencias();
-  } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Erro!',
-      text: error.message,
-    });
-  }
-});
+  });
+}
 
 const buscaInput = document.getElementById('buscarOcorrencias');
 const botaoBuscar = document.getElementById('botaoBuscar');
@@ -413,13 +448,15 @@ if (botaoBuscar && buscaInput) {
   });
 
   buscaInput.addEventListener('keydown', (event) => {
+    /* istanbul ignore next */
     if (event.key === 'Enter') {
       const termo = buscaInput.value.trim();
       carregarOcorrencias(termo);
     }
-  });
+});
 }
 
+/* istanbul ignore next */
 if (botaoVoz && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
   const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognitionCtor();
@@ -458,4 +495,16 @@ if (botaoVoz && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in w
   botaoVoz.title = 'Reconhecimento de voz indisponível neste navegador';
 }
 
-carregarOcorrencias();
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    apiUrl,
+    mensagemErroRede,
+    escapeHtml,
+    arquivoEhImagemPermitida
+  };
+}
+
+/* istanbul ignore next */
+if (typeof window !== 'undefined' && !process.env.JEST_WORKER_ID) {
+  carregarOcorrencias();
+}

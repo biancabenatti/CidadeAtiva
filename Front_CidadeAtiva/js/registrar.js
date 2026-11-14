@@ -138,3 +138,11 @@ form.addEventListener('submit', async (e) => {
         });
     }
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    apiUrl,
+    arquivoEhImagemPermitida,
+    mensagemErroRede
+  };
+}

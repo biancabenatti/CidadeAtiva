@@ -10,3 +10,7 @@ function resolveApiBaseUrl() {
 window.APP_CONFIG = {
   API_BASE_URL: resolveApiBaseUrl(),
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { resolveApiBaseUrl };
+}

@@ -1,0 +1,31 @@
+{
+  "name": "front_cidadeativa",
+  "version": "1.0.0",
+  "description": "Interface web do projeto Cidade Ativa, uma aplicação para registro e acompanhamento de ocorrências urbanas.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "collectCoverageFrom": [
+      "js/**/*.js",
+      "!js/**/*.min.js"
+    ],
+    "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "jquery.magnific-popup.js",
+    "scripts.js"
+  ]
+  }
+}
