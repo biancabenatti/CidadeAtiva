@@ -6,8 +6,7 @@
   "scripts": {
     "test": "jest --coverage",
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "lint": "eslint ."
+    "dev": "nodemon index.js"
   },
   "jest": {
     "coverageThreshold": {
