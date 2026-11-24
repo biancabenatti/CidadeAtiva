@@ -40,8 +40,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Rotas
 const ocorrenciasRoutes = require('./routes/ocorrencias');
 const uploadRoutes = require('./routes/upload');
+const chatbotRoutes = require('./routes/chatbot');
 app.use('/api/ocorrencias', ocorrenciasRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.get('/', (req, res) => {
     res.send('Servidor Cidade Ativa rodando!');
@@ -62,7 +64,12 @@ async function startServer() {
     await connectMongo();
   } catch (error) {
     console.error('Falha ao conectar MongoDB:', error.message);
-    //process.exit(1);
+    try {
+      writeLog(`Falha ao conectar MongoDB: ${error.message}`);
+    } catch (_) {
+      // ignora falha ao registrar log
+    }
+    process.exit(1);
   }
 
   app.listen(PORT, '0.0.0.0', () => {

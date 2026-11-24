@@ -3,7 +3,7 @@ function resolveApiBaseUrl() {
   const queryApi = new URLSearchParams(window.location.search).get('api');
   if (queryApi) return queryApi.replace(/\/$/, '');
 
-  const fallback = 'https://back-cidadeativa.onrender.com';
+  const fallback = 'http://127.0.0.1:5000';
   return fallback;
 }
 

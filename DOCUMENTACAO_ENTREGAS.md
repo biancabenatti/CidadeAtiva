@@ -211,3 +211,60 @@ Os testes automatizados AUT-01 a AUT-03 não cobrem a interface nem as transiç�
 ## 6) Considerações finais
 
 O documento especifica requisitos, classes de equivalência, casos funcionais e critérios de cobertura de estados, transições e caminhos. A suíte automatizada de relevância foi executada com sucesso (3 testes aprovados), e o grupo confirmou a execução bem-sucedida dos casos manuais de interface e dos cenários de cadastro.
+
+## 7) 2ª Entrega – Desenvolvimento de ChatBot (TF-IDF + SVM)
+
+### Objetivo atendido
+Foi implementado um chatbot funcional, baseado em regras, com classificação de intenções por PLN. O chatbot auxilia o usuário no registro de ocorrências na tela `registrar.html`: identifica a intenção das mensagens, conduz o diálogo por regras e, ao final, preenche o formulário de ocorrência com os dados coletados.
+
+### Implementação (arquivos principais)
+- **NLP/treino e classificação:** [`Back_CidadeAtiva/services/chatbotNlp.js`](Back_CidadeAtiva/services/chatbotNlp.js)
+  - Normalização e tokenização de texto.
+  - **Representação TF-IDF:** vocabulário construído a partir das frases de treino; cálculo de TF e IDF com suavização; vetores L2-normalizados.
+  - **Classificador SVM:** SVM linear multiclasse no esquema *one-vs-rest*, treinado com gradiente/hinge loss (margem) e regularização L2.
+  - Exporta `classificarIntencao(texto)` retornando intenção e confiança; o modelo é treinado ao carregar o serviço.
+- **Regras e diálogo:** [`Back_CidadeAtiva/services/chatbotRegras.js`](Back_CidadeAtiva/services/chatbotRegras.js)
+  - Mantém estado da conversa (etapa e dados coletados: título, localização, descrição, foto).
+  - Aplica regras de resposta/fluxo conforme intenção classificada e etapa (saudação, iniciar registro, coleta de campos obrigatórios, pergunta sobre foto opcional, confirmação/correção/cancelamento, ajuda, listagem, despedida/agradecimento).
+  - Em caso de baixa confiança, solicita reformulação.
+- **API:** [`Back_CidadeAtiva/routes/chatbot.js`](Back_CidadeAtiva/routes/chatbot.js)
+  - `GET /api/chatbot/estado-inicial`: retorna estado inicial.
+  - `POST /api/chatbot/mensagem`: recebe `{ mensagem, estado }`, classifica a intenção, aplica regras e retorna `{ intencao, confianca, resposta, estado, preencherFormulario? }`.
+  - Montado em [`Back_CidadeAtiva/index.js`](Back_CidadeAtiva/index.js) em `/api/chatbot`.
+- **Interface (frontend):** [`Front_CidadeAtiva/js/chatbot.js`](Front_CidadeAtiva/js/chatbot.js), [`Front_CidadeAtiva/css/chatbot.css`](Front_CidadeAtiva/css/chatbot.css), incluídos em [`Front_CidadeAtiva/registrar.html`](Front_CidadeAtiva/registrar.html)
+  - Widget flutuante de chat (abrir/fechar, histórico, envio de mensagens).
+  - Envia mensagens para a API, exibe respostas do bot, atualiza estado e preenche automaticamente os campos do formulário (`#titulo`, `#localizacao`, `#descricao`) quando a confirmação é concluída.
+
+### Intenções definidas e exemplos de treino
+As intenções e frases de treino estão em `INTENTS_DATA` no serviço de NLP. Conjunto implementado:
+- `saudacao`: cumprimentos (ex.: "oi", "bom dia", "olá").
+- `despedida`: encerramento (ex.: "tchau", "até mais").
+- `agradecimento`: agradecimentos (ex.: "obrigado", "valeu").
+- `iniciar_registro`: desejo de registrar/reportar problema (ex.: "quero registrar uma ocorrência", "reportar problema").
+- `informar_problema`: descrição do tipo de problema (ex.: "tem um buraco na rua", "poste com luz apagada").
+- `informar_localizacao`: endereço/ponto de referência (ex.: "fica na rua das flores 123", "na avenida brasil").
+- `informar_descricao`: detalhes adicionais do problema.
+- `confirmar`: confirmação de ação/dados (ex.: "sim", "pode enviar", "correto").
+- `negar`: recusa/cancelamento (ex.: "não", "cancelar").
+- `corrigir`: pedido de correção (ex.: "quero corrigir", "mudar informação").
+- `pular_foto`: seguir sem foto (ex.: "sem foto", "não tenho foto").
+- `listar_ocorrencias`: consultar ocorrências (ex.: "quero ver ocorrências").
+- `ajuda`: dúvidas/instruções (ex.: "como funciona", "preciso de ajuda").
+
+### Fluxo (regras) implementado
+1. Início/saudação: bot pergunta se o usuário deseja registrar um problema.
+2. Coleta sequencial de **título**, **localização** e **descrição** (campos obrigatórios; entradas vazias/muito curtas são rejeitadas com pedido de nova informação).
+3. Pergunta sobre **foto** (opcional; pode anexar no formulário ou seguir sem foto).
+4. Apresenta **resumo** e solicita confirmação: ao confirmar, preenche o formulário para envio; permite corrigir ou cancelar.
+5. Intenções globais tratadas por regras: ajuda, listar ocorrências, despedida/agradecimento.
+
+### Como executar e demonstrar
+1. Iniciar backend: em `Back_CidadeAtiva`, `npm install` (se necessário) e `npm run dev` (ou `npm start`).
+2. Abrir frontend (ex.: Live Server) e acessar `registrar.html`.
+3. Clicar no botão flutuante do chatbot e interagir (ex.: "quero registrar um problema" → informar título, localização, descrição → "sem foto" → "sim").
+4. Conferir que os campos do formulário são preenchidos e enviar a ocorrência pelo botão "Enviar ocorrência".
+
+### Verificação realizada
+- Verificação automatizada/sanity check do classificador (TF-IDF + SVM) com frases representativas confirmou identificação correta de intenções principais (ex.: saudação, iniciar registro, informar problema/localização, confirmar, negar, ajuda, listar ocorrências).
+- Simulação do fluxo completo de regras confirmou coleta de dados, resumo e retorno de `preencherFormulario` ao confirmar o registro.
+- A validação visual completa (UI do widget no navegador com backend ativo) depende de execução local do frontend e backend.

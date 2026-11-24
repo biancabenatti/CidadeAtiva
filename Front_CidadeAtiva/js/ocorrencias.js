@@ -129,9 +129,15 @@ async function carregarOcorrencias(consulta = '') {
 
     const status = document.getElementById('resultadoBusca');
     if (status) {
-      status.textContent = termo
-        ? `Busca semântica: "${termo}"`
-        : 'Exibindo todas as ocorrências.';
+      if (termo) {
+        status.textContent = dados.length
+          ? `Busca semântica: "${termo}" (${dados.length} resultado(s))`
+          : `Busca semântica: "${termo}" — nenhum resultado`;
+      } else {
+        status.textContent = dados.length
+          ? `Exibindo todas as ocorrências (${dados.length}).`
+          : 'Nenhuma ocorrência cadastrada no banco.';
+      }
     }
   } catch (error) {
     lista.innerHTML = `<p class="occurrences-status">${escapeHtml(mensagemErroRede(error))}</p>`;
@@ -505,6 +511,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 /* istanbul ignore next */
-if (typeof window !== 'undefined' && !process.env.JEST_WORKER_ID) {
+const isJest = typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID;
+if (typeof window !== 'undefined' && !isJest) {
   carregarOcorrencias();
 }
