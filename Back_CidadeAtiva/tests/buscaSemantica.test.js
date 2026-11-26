@@ -33,7 +33,7 @@ describe('Testes de buscaSemantica', () => {
     expect(calcularRelevancia('luz', {})).toBe(0);
     expect(calcularRelevancia('luz', null)).toBe(0);
   });
-
+// teste para apresentação 
   test('deve acionar a busca parcial para termos com mais de 4 letras', () => {
     // 'iluminacao' tem mais de 4 letras, testando uma variação cortada que ative o .slice(0, -1)
     const ocorrenciaParcial = { titulo: 'iluminacao', descricao: '' };
